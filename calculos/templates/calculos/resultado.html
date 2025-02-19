@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Resultado del Cálculo</title>
+</head>
+<body>
+    <h1>Resultados para {{ nombre_proyecto }}</h1>
+
+    <p><strong>Tipo de Cálculo:</strong> {{ tipo_calculo }}</p>
+    <p><strong>Área:</strong> {{ area }} m²</p>
+    <p><strong>Desperdicio Considerado:</strong> {{ desperdicio }}%</p>
+
+    <h2>Materiales Necesarios:</h2>
+    <ul>
+        {% for material, cantidad in materiales.items %}
+            <li>{{ material|title }}: {{ cantidad }}</li>
+        {% empty %}
+            <li>No hay materiales calculados.</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'calcular_materiales' %}">Hacer otro cálculo</a>
+    <a href="/">Volver a Inicio</a>
+</body>
+</html>

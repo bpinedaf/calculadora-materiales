@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center">Gestión de Proyectos</h2>
+    <p class="text-center">Selecciona un proyecto para ver sus cálculos o agregar uno nuevo.</p>
+
+    <!-- Formulario para agregar un nuevo proyecto -->
+    <div class="card p-3 mb-4">
+        <h4>Agregar Nuevo Proyecto</h4>
+        <form method="post" action="{% url 'agregar_proyecto' %}">
+            {% csrf_token %}
+            <div class="input-group">
+                <input type="text" name="nombre" class="form-control" placeholder="Nombre del Proyecto" required>
+                <button type="submit" class="btn btn-primary">Agregar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Lista de proyectos -->
+    <div class="row text-center">
+        {% for proyecto in proyectos %}
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ proyecto.nombre }}</h5>
+                    <p>Creado el: {{ proyecto.fecha_creacion|date:"d/m/Y" }}</p>
+                    <a href="{% url 'ver_calculos' proyecto.id %}" class="btn btn-success">Ver Cálculos</a>
+                    <a href="{% url 'eliminar_proyecto' proyecto.id %}" class="btn btn-danger">Eliminar</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center">No hay proyectos registrados.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

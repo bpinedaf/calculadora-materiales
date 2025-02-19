@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Lista de Materiales</h2>
+
+    <a href="{% url 'calculos:agregar_material' %}" class="btn btn-success mb-3">Agregar Nuevo Material</a>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Unidad</th>
+                <th>Precio Unitario</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for material in materiales %}
+                <tr>
+                    <td>{{ material.nombre }}</td>
+                    <td>{{ material.unidad }}</td>
+                    <td>Q{{ material.precio_unitario }}</td>
+                    <td>
+                        <a href="{% url 'calculos:editar_material' material.pk %}" class="btn btn-warning btn-sm">✏️ Editar</a>
+                        <a href="{% url 'calculos:eliminar_material' material.pk %}" class="btn btn-danger btn-sm">❌ Eliminar</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">No hay materiales registrados.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

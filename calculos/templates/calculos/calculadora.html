@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center">Calculadora de Materiales</h2>
+    <p class="text-center">Seleccione un proyecto y complete los datos para realizar el cálculo de materiales.</p>
+
+    <div class="card p-4 shadow-sm">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label class="form-label">Seleccionar Proyecto:</label>
+                <select name="proyecto_existente" class="form-select">
+                    <option value="">-- Crear un nuevo proyecto --</option>
+                    {% for proyecto in proyectos %}
+                        <option value="{{ proyecto.id }}">{{ proyecto.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">O Crear Nuevo Proyecto:</label>
+                <input type="text" name="nuevo_proyecto" placeholder="Nombre del Proyecto" class="form-control">
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Descripción del Cálculo:</label>
+                <input type="text" name="descripcion" placeholder="Ejemplo: Muro Perimetral, Losa Segundo Nivel" required class="form-control">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Tipo de Cálculo:</label>
+                <select name="tipo_calculo" required class="form-select">
+                    <option value="muro">Muro</option>
+                    <option value="losa_fundida">Losa Fundida</option>
+                    <option value="losa_vigueta_bovedilla">Losa con Vigueta y Bovedilla</option>
+                    <option value="losa_acero">Losa de Acero</option>
+                    <option value="cimentacion">Cimentación</option>
+                    <option value="zapatas">Zapatas</option>
+                    <option value="repello">Repello</option>
+                    <option value="piso">Piso</option>
+                    <option value="cielo_falso">Cielo Falso</option>
+                </select>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Área en m²:</label>
+                    <input type="number" step="0.01" name="area" required class="form-control">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Desperdicio (%):</label>
+                    <input type="number" step="0.1" name="desperdicio" value="5" class="form-control">
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">Calcular</button>
+                <a href="/" class="btn btn-secondary ms-2">Volver a Inicio</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
