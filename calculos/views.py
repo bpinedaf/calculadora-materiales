@@ -2,7 +2,7 @@ import pandas as pd
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from materiales.models import Material
-from .models import CalculoMateriales, Proyecto
+from .models import CalculoMateriales, Proyecto, CalculoMaterialDetalle
 from .forms import CalculoMaterialesForm
 
 
@@ -66,7 +66,7 @@ def calcular_materiales(request):
         proyecto_id = request.POST.get('proyecto_existente')
         nuevo_proyecto_nombre = request.POST.get('nuevo_proyecto')
         descripcion = request.POST.get('descripcion')
-        
+
         if nuevo_proyecto_nombre:
             proyecto, created = Proyecto.objects.get_or_create(nombre=nuevo_proyecto_nombre)
         elif proyecto_id:
@@ -78,16 +78,47 @@ def calcular_materiales(request):
         area = float(request.POST.get('area', 0))
         desperdicio = float(request.POST.get('desperdicio', 5)) / 100
 
-        CalculoMateriales.objects.create(
+        # Crear el cálculo de materiales
+        calculo = CalculoMateriales.objects.create(
             proyecto=proyecto,
             descripcion=descripcion,
             tipo_calculo=tipo_calculo,
             area=area,
             desperdicio=desperdicio * 100
         )
+
+        # Guardar los materiales en la base de datos (aunque no existan en la lista de materiales)
+        if tipo_calculo in FACTORES_MATERIALES:
+            for material_nombre, factor in FACTORES_MATERIALES[tipo_calculo].items():
+                cantidad_requerida = area * factor * (1 + desperdicio)
+                cantidad_pendiente = cantidad_requerida  # Al inicio, nada ha sido consumido
+
+                # Buscar el material en la base de datos, pero permitir crear el registro incluso si no existe
+                material_obj = Material.objects.filter(nombre__iexact=material_nombre).first()
+                
+                if not material_obj:
+                    print(f"⚠️ Material {material_nombre} NO está en la base de datos. Se registrará con precio 0.0.")
+                    unidad_predeterminada = "unidad"  # Podrías ajustar esto según el tipo de material
+                    material_obj = Material.objects.create(
+                        nombre=material_nombre.capitalize(), 
+                        unidad=unidad_predeterminada, 
+                        precio_unitario=0.0
+                    )
+
+                # Guardar el detalle del material en la base de datos
+                CalculoMaterialDetalle.objects.create(
+                    calculo=calculo,
+                    material=material_obj,
+                    cantidad_requerida=cantidad_requerida,
+                    cantidad_consumida=0.0,
+                    cantidad_pendiente=cantidad_pendiente
+                )
+
         return redirect('calculos:ver_calculos', proyecto.id)
-    
+
     return render(request, 'calculos/calculadora.html', {'proyectos': proyectos})
+
+
 
 
 
@@ -98,14 +129,42 @@ def ver_calculos_por_proyecto(request, proyecto_id):
 
     resumen_costos = {}
     costo_total = 0
+    calculos_detallados = []
 
     for calculo in calculos:
-        materiales = Material.objects.all()
-        for material in materiales:
-            if material.nombre not in resumen_costos:
-                resumen_costos[material.nombre] = 0
-            resumen_costos[material.nombre] += material.precio_unitario * calculo.area
-            costo_total += material.precio_unitario * calculo.area
+        tipo = calculo.tipo_calculo
+        area = calculo.area
+        desperdicio = calculo.desperdicio / 100  # Convertir a decimal
+
+        materiales_consumidos = {}
+        materiales_pendientes = {}
+
+        if tipo in FACTORES_MATERIALES:
+            for material, factor in FACTORES_MATERIALES[tipo].items():
+                cantidad_requerida = area * factor * (1 + desperdicio)
+                cantidad_pendiente = cantidad_requerida * ((100 - calculo.avance) / 100)
+                cantidad_consumida = cantidad_requerida - cantidad_pendiente
+
+                materiales_consumidos[material] = round(cantidad_consumida, 2)
+                materiales_pendientes[material] = round(cantidad_pendiente, 2)
+
+                # Agregar al resumen de costos
+                material_obj = Material.objects.filter(nombre=material).first()
+                if material_obj:
+                    costo_material = material_obj.precio_unitario * cantidad_requerida
+                    resumen_costos[material] = resumen_costos.get(material, 0) + costo_material
+                    costo_total += costo_material
+
+        calculos_detallados.append({
+            "id": calculo.id,
+            "descripcion": calculo.descripcion,
+            "tipo_calculo": calculo.tipo_calculo,
+            "area": calculo.area,
+            "desperdicio": calculo.desperdicio,
+            "avance": calculo.avance,
+            "materiales_consumidos": materiales_consumidos,
+            "materiales_pendientes": materiales_pendientes,
+        })
 
     return render(
         request,
@@ -113,11 +172,12 @@ def ver_calculos_por_proyecto(request, proyecto_id):
         {
             "proyectos": proyectos,
             "proyecto_seleccionado": proyecto_seleccionado,
-            "calculos": calculos,
+            "calculos": calculos_detallados,
             "resumen_costos": resumen_costos,
             "costo_total": costo_total,
         },
     )
+
 
 
 def editar_calculo(request, calculo_id):
@@ -142,33 +202,49 @@ def eliminar_calculo(request, calculo_id):
 def exportar_calculos_excel(request, proyecto_id):
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     calculos = CalculoMateriales.objects.filter(proyecto=proyecto)
+
     data = []
     for calculo in calculos:
-        for material in Material.objects.all():
+        detalles_materiales = CalculoMaterialDetalle.objects.filter(calculo=calculo)
+
+        for detalle in detalles_materiales:
+            avance = calculo.avance  # Obtener el porcentaje de avance
             data.append([
-                proyecto.nombre,
-                calculo.fecha_calculo.strftime("%d/%m/%Y"),
-                calculo.fecha_reporte.strftime("%d/%m/%Y") if calculo.fecha_reporte else "N/A",
-                material.nombre,
-                material.unidad_medida,
-                calculo.cantidad_consumida,
-                calculo.cantidad_pendiente,
-                material.precio_unitario,
-                calculo.cantidad_consumida * material.precio_unitario,
-                calculo.desperdicio_estimado,
-                calculo.costo_total
+                proyecto.nombre,  # Nombre del Proyecto
+                calculo.descripcion,  # Descripción del cálculo (Ej. "Muros Planta Baja")
+                calculo.tipo_calculo,  # Tipo de Cálculo (Ej. "muro")
+                calculo.fecha.strftime("%d/%m/%Y"),  # Fecha de Creación del Cálculo
+                detalle.material.nombre,  # Nombre del Material
+                detalle.material.unidad,  # Unidad de Medida
+                round(detalle.cantidad_consumida, 2),  # Cantidad Consumida
+                round(detalle.cantidad_pendiente, 2),  # Cantidad Pendiente
+                detalle.material.precio_unitario if detalle.material.precio_unitario > 0 else "No registrado",  # Precio Unitario
+                round(detalle.cantidad_consumida * float(detalle.material.precio_unitario), 2) if detalle.material.precio_unitario > 0 else 0,  # Costo por Material
+                calculo.desperdicio,  # Desperdicio Estimado (%)
+                round(detalle.cantidad_requerida * float(detalle.material.precio_unitario), 2) if detalle.material.precio_unitario > 0 else 0,  # Costo Total
+                avance  # % de Avance
             ])
+
+    if not data:
+        return HttpResponse("No se generaron datos para la exportación.", content_type="text/plain")
+
     df = pd.DataFrame(data, columns=[
-        "Proyecto", "Fecha de Cálculo", "Último Reporte",
-        "Material", "Unidad", "Cantidad Consumida",
-        "Cantidad Pendiente", "Precio Unitario",
-        "Costo por Material", "Desperdicio Estimado", "Costo Total"
+        "Proyecto", "Descripción del Cálculo", "Tipo de Cálculo",
+        "Fecha de Cálculo", "Material", "Unidad", "Cantidad Consumida",
+        "Cantidad Pendiente", "Precio Unitario", "Costo por Material",
+        "Desperdicio Estimado", "Costo Total", "Avance (%)"
     ])
+
     response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     response["Content-Disposition"] = f'attachment; filename="calculos_{proyecto.nombre}.xlsx"'
+
     with pd.ExcelWriter(response, engine="xlsxwriter") as writer:
         df.to_excel(writer, index=False, sheet_name="Cálculos")
+
     return response
+
+
+
 
 def actualizar_avance(request):
     if request.method == 'POST':

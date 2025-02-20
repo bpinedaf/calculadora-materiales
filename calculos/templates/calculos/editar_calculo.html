@@ -1,18 +1,15 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Editar Cálculo</title>
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
     <h1>Editar Cálculo</h1>
 
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Guardar Cambios</button>
+        <button type="submit" class="btn btn-success">Guardar Cambios</button>
     </form>
 
-    <a href="{% url 'ver_calculos' %}">Volver</a>
-</body>
-</html>
+    <a href="{% url 'calculos:ver_calculos' proyecto_id=calculo.proyecto.id %}" class="btn btn-secondary mt-3">Volver</a>
+</div>
+{% endblock %}

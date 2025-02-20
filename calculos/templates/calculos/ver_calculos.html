@@ -24,7 +24,11 @@
 
 <!-- Botón para exportar cálculos a Excel -->
 <div class="text-center my-3">
-    <a href="{% url 'calculos:exportar_calculos_excel' proyecto_seleccionado.id %}" class="btn btn-success">Exportar a Excel</a>
+    {% if proyecto_seleccionado %}
+		<div class="text-center my-3">
+			<a href="{% url 'calculos:exportar_calculos_excel' proyecto_seleccionado.id %}" class="btn btn-success">Exportar a Excel</a>
+		</div>
+	{% endif %}
 </div>
 
 <!-- Formulario para actualizar avances -->
@@ -57,19 +61,20 @@
                     </div>
                 </td>
                 <td>
-                    {% for material, cantidad in calculo.materiales_consumidos.items %}
-                        <span class="badge bg-primary">{{ material }}: {{ cantidad }}</span><br>
-                    {% endfor %}
-                </td>
-                <td>
-                    {% for material, cantidad in calculo.materiales_pendientes.items %}
-                        <span class="badge bg-secondary">{{ material }}: {{ cantidad }}</span><br>
-                    {% endfor %}
-                </td>
-                <td>
-                    <a href="{% url 'calculos:editar_calculo' calculo.id %}" class="btn btn-sm btn-warning">Editar</a>
-                    <a href="{% url 'calculos:eliminar_calculo' calculo.id %}" class="btn btn-sm btn-danger">Eliminar</a>
-                </td>
+					{% for material, cantidad in calculo.materiales_consumidos.items %}
+						<span class="badge bg-primary">{{ material }}: {{ cantidad }}</span><br>
+					{% empty %}
+						<span class="text-muted">Sin datos</span>
+					{% endfor %}
+				</td>
+				<td>
+					{% for material, cantidad in calculo.materiales_pendientes.items %}
+						<span class="badge bg-secondary">{{ material }}: {{ cantidad }}</span><br>
+					{% empty %}
+						<span class="text-muted">Sin datos</span>
+					{% endfor %}
+				</td>
+
             </tr>
             {% empty %}
             <tr>

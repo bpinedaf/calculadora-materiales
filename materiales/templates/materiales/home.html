@@ -50,14 +50,26 @@
 				<div class="card-body">
 					<h5 class="card-title">Exportar Cálculos</h5>
 					<p class="card-text">Selecciona un proyecto para exportar los cálculos.</p>
-					<form method="GET" action="{% url 'calculos:exportar_calculos_excel' 1 %}">
-						<select name="proyecto_id" class="form-control mb-2">
+					<form method="GET" action="">
+						<select name="proyecto_id" class="form-control mb-2" id="proyectoSeleccionado">
 							{% for proyecto in proyectos %}
 								<option value="{{ proyecto.id }}">{{ proyecto.nombre }}</option>
 							{% endfor %}
 						</select>
-						<button type="submit" class="btn btn-success">Descargar Excel</button>
+						<button type="button" class="btn btn-success" onclick="exportarCalculos()">Descargar Excel</button>
 					</form>
+
+					<script>
+						function exportarCalculos() {
+							var proyectoId = document.getElementById("proyectoSeleccionado").value;
+							if (proyectoId) {
+								window.location.href = `/calculos/exportar_calculos/${proyectoId}/`;
+							} else {
+								alert("Por favor, selecciona un proyecto antes de exportar.");
+							}
+						}
+					</script>
+
 				</div>
 			</div>
 		</div>

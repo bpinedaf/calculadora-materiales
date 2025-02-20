@@ -1,4 +1,5 @@
 from django.db import models
+from materiales.models import Material  # ✅ Agregamos la importación
 
 class Proyecto(models.Model):
     nombre = models.CharField(max_length=150, unique=True)
@@ -30,3 +31,13 @@ class CalculoMateriales(models.Model):
 
     def __str__(self):
         return f"{self.proyecto.nombre} - {self.descripcion} - {self.tipo_calculo} - {self.area} m²"
+
+class CalculoMaterialDetalle(models.Model):
+    calculo = models.ForeignKey(CalculoMateriales, on_delete=models.CASCADE, related_name="materiales")
+    material = models.ForeignKey(Material, on_delete=models.CASCADE)  # ✅ Ahora sí reconoce `Material`
+    cantidad_requerida = models.FloatField()
+    cantidad_consumida = models.FloatField(default=0.0)
+    cantidad_pendiente = models.FloatField()
+
+    def __str__(self):
+        return f"{self.material.nombre} - Req: {self.cantidad_requerida} - Cons: {self.cantidad_consumida} - Pend: {self.cantidad_pendiente}"
