@@ -8,7 +8,7 @@
     <!-- Formulario para agregar un nuevo proyecto -->
     <div class="card p-3 mb-4">
         <h4>Agregar Nuevo Proyecto</h4>
-        <form method="post" action="{% url 'agregar_proyecto' %}">
+        <form method="post" action="{% url 'calculos:agregar_proyecto' %}">
             {% csrf_token %}
             <div class="input-group">
                 <input type="text" name="nombre" class="form-control" placeholder="Nombre del Proyecto" required>
@@ -25,8 +25,8 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ proyecto.nombre }}</h5>
                     <p>Creado el: {{ proyecto.fecha_creacion|date:"d/m/Y" }}</p>
-                    <a href="{% url 'ver_calculos' proyecto.id %}" class="btn btn-success">Ver Cálculos</a>
-                    <a href="{% url 'eliminar_proyecto' proyecto.id %}" class="btn btn-danger">Eliminar</a>
+                    <a href="{% url 'calculos:ver_calculos' proyecto.id %}" class="btn btn-success">Ver Cálculos</a>
+                    <a href="{% url 'calculos:eliminar_proyecto' proyecto.id %}" class="btn btn-danger">Eliminar</a>
                 </div>
             </div>
         </div>
@@ -34,5 +34,11 @@
         <p class="text-center">No hay proyectos registrados.</p>
         {% endfor %}
     </div>
+</div>
+
+
+<!-- Botón para regresar al menú principal -->
+<div class="text-center mt-4">
+    <a href="{% url 'home' %}" class="btn btn-secondary">Regresar al Menú Principal</a>
 </div>
 {% endblock %}
