@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 
+import os
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,13 +26,6 @@ SECRET_KEY = 'django-insecure-c=oy61fd#bbx9ggy56x^glwz%%*2o1)+ch%g#91^a)+dn6j$yi
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = [
-    "127.0.0.1",  # Para desarrollo local
-    "localhost",
-    "calculadora-materiales-production.up.railway.app",  # Agrega la URL de Railway
-]
-
 
 # Application definition
 
@@ -45,8 +40,31 @@ INSTALLED_APPS = [
     'calculos', 
 ]
 
+# Configuración de archivos estáticos
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Configuración de archivos de medios (imágenes subidas)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Agregar Railway a los hosts confiables
+ALLOWED_HOSTS = [
+    "127.0.0.1", 
+    "localhost",
+    "calculadora-materiales-production.up.railway.app"
+]
+
+
+# Whitenoise para servir archivos estáticos en producción
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
