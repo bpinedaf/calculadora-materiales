@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-c=oy61fd#bbx9ggy56x^glwz%%*2o1)+ch%g#91^a)+dn6j$yi
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "127.0.0.1",  # Para desarrollo local
+    "localhost",
+    "calculadora-materiales-production.up.railway.app",  # Agrega la URL de Railway
+]
 
 
 # Application definition
