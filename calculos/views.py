@@ -9,59 +9,108 @@ from .forms import CalculoMaterialesForm
 # Factores de consumo por m² para cada tipo de estructura
 FACTORES_MATERIALES = {
     'muro': {
-        'blocks': 12.5,
-        'cemento': 0.5,
-        'arena': 0.05,
-        'cal': 0.02,
-    },
-    'losa_fundida': {
-        'cemento': 7,
-        'arena': 0.7,
-        'grava': 0.7,
-        'agua': 175,
+        'blocks': 12.5,  
+        'cemento': 0.5,  
+        'arena': 0.05,  
+        'cal': 0.02,  
+        'varilla_vertical': 1.67,  
+        'varilla_horizontal': 1.33,  
+        'sobrecimiento': 0.1,  
+        'estribos_1/4': 1.5,  
     },
     'losa_vigueta_bovedilla': {
-        'viguetas': 2.5,
-        'bovedillas': 6,
-        'cemento': 1,
-        'arena': 0.05,
-    },
-    'losa_acero': {
-        'placas_acero': 1,
-        'pernos': 4,
-        'cemento': 0.8,
+        'viguetas': 2.5,  
+        'bovedillas': 6,  
+        'malla_electrosoldada': 1,  
+        'capa_compresion_concreto': 0.057,  
+        'cemento': 1,  
+        'arena': 0.25,  
+        'grava': 0.3,  
+        'agua': 50,  
+        'puntales': 0.35,  
+        'alambre_recocido': 0.5,  
+        'acero_temperatura': 1.5,  
+        'cimbra_madera': 0.6,  
     },
     'cimentacion': {
-        'cemento': 9,
-        'arena': 0.8,
-        'grava': 0.8,
-        'agua': 180,
+        'cimientos_corridos': 0.2,  
+        'varilla_1/2': 5,  
+        'estribos_1/4': 3,  
+        'concreto': 0.2,  
+        'varilla_3/8': 8,  
+        'block': 10,  
+        'solera_U': 2,  
+        'amarres': 1.5,  
+    },
+    'vigas_confinamiento': {
+        'concreto': 0.08,  
+        'varilla_1/2': 4,  
+        'estribos_1/4': 2.5,  
     },
     'zapatas': {
-        'cemento': 7,  # Sacos de cemento por m³ de concreto
-        'arena': 0.5,  # m³ de arena por m³ de concreto
-        'grava': 0.7,  # m³ de grava por m³ de concreto
-        'agua': 180,   # Litros de agua por m³ de concreto
-        'acero': 15,   # Kg de acero por m²
+        'cemento': 7,  
+        'arena': 0.5,  
+        'grava': 0.7,  
+        'agua': 180,  
+        'acero': 15,  
     },
-    'repello': {
-        'cemento': 3,  # Sacos de cemento por cada 10 m²
-        'arena': 0.1,  # m³ de arena por m²
+    'escaleras': {
+        'concreto': 0.2,  
+        'varilla_1/2': 6,  
+        'estribos_1/4': 4,  
+        'cimbra_madera': 0.5,  
+        'puntales': 0.2,  
     },
     'piso': {
-        'cemento': 3.5,  # Sacos de cemento por m²
-        'arena': 0.12,
-        'grava': 0.15,
+        'piezas_piso': 1.05,  
+        'mortero_adhesivo': 4,  
+        'cisa': 0.2,  
+        'mortero_nivelacion': 0.02,  
     },
     'cielo_falso': {
-        'paneles': 1.2,  # Paneles de gypsum por m²
-        'perfiles': 0.5,  # Metros lineales de perfil metálico
-        'tornillos': 20,  # Cantidad de tornillos
+        'paneles': 1.2,  
+        'perfiles': 0.6,  
+        'tornillos': 20,  
+        'suspensiones': 0.3,  
+        'anclajes': 0.15,  
+        'aislante_termico': 0.8,  
+        'arriostramiento_sismico': 0.2,  
+    },
+    'C-A': {  
+        'concreto': 0.15,  
+        'varilla_1/2': 4,  
+        'estribos_1/4': 3,  
+        'amarres': 0.8,  
+        'cimbra_madera': 0.35,  
+    },
+    'C-B': {  
+        'concreto': 0.12,  
+        'varilla_3/8': 4,  
+        'estribos_1/4': 2.5,  
+        'amarres': 0.7,  
+        'cimbra_madera': 0.3,  
+    },
+    'C-C': {  
+        'concreto': 0.18,  
+        'varilla_1/2': 5,  
+        'estribos_1/4': 3.5,  
+        'amarres': 0.9,  
+        'cimbra_madera': 0.4,  
+    },
+    'C-D': {  
+        'concreto': 0.22,  
+        'varilla_1/2': 8,  
+        'estribos_1/4': 4,  
+        'amarres': 1.2,  
+        'cimbra_madera': 0.45,  
     },
 }
 
+
 def calcular_materiales(request):
     proyectos = Proyecto.objects.all()
+    tipos_calculo = CalculoMateriales.TIPO_CALCULO_CHOICES  # Obtener opciones dinámicamente
+
     if request.method == 'POST':
         proyecto_id = request.POST.get('proyecto_existente')
         nuevo_proyecto_nombre = request.POST.get('nuevo_proyecto')
@@ -75,8 +124,23 @@ def calcular_materiales(request):
             return render(request, 'calculos/error.html', {'mensaje': 'Debes seleccionar o crear un proyecto'})
 
         tipo_calculo = request.POST.get('tipo_calculo')
-        area = float(request.POST.get('area', 0))
         desperdicio = float(request.POST.get('desperdicio', 5)) / 100
+
+        # Verificar si el cálculo es de tipo columna
+        if tipo_calculo in ["C-A", "C-B", "C-C", "C-D"]:
+            cantidad_columnas = int(request.POST.get('cantidad_columnas', 0))
+            columna_ancho = float(request.POST.get('columna_ancho', 0))
+            columna_profundidad = float(request.POST.get('columna_profundidad', 0))
+            columna_altura = float(request.POST.get('columna_altura', 0))
+
+            # Calcular el área de una columna
+            perimetro_columna = 2 * (columna_ancho + columna_profundidad)
+            area_columna = perimetro_columna * columna_altura
+
+            # Calcular el área total de columnas
+            area = area_columna * cantidad_columnas
+        else:
+            area = float(request.POST.get('area', 0))
 
         # Crear el cálculo de materiales
         calculo = CalculoMateriales.objects.create(
@@ -87,25 +151,23 @@ def calcular_materiales(request):
             desperdicio=desperdicio * 100
         )
 
-        # Guardar los materiales en la base de datos (aunque no existan en la lista de materiales)
+        # Guardar los materiales en la base de datos
         if tipo_calculo in FACTORES_MATERIALES:
             for material_nombre, factor in FACTORES_MATERIALES[tipo_calculo].items():
                 cantidad_requerida = area * factor * (1 + desperdicio)
                 cantidad_pendiente = cantidad_requerida  # Al inicio, nada ha sido consumido
 
-                # Buscar el material en la base de datos, pero permitir crear el registro incluso si no existe
                 material_obj = Material.objects.filter(nombre__iexact=material_nombre).first()
-                
+
                 if not material_obj:
                     print(f"⚠️ Material {material_nombre} NO está en la base de datos. Se registrará con precio 0.0.")
-                    unidad_predeterminada = "unidad"  # Podrías ajustar esto según el tipo de material
+                    unidad_predeterminada = "unidad"
                     material_obj = Material.objects.create(
-                        nombre=material_nombre.capitalize(), 
-                        unidad=unidad_predeterminada, 
+                        nombre=material_nombre.capitalize(),
+                        unidad=unidad_predeterminada,
                         precio_unitario=0.0
                     )
 
-                # Guardar el detalle del material en la base de datos
                 CalculoMaterialDetalle.objects.create(
                     calculo=calculo,
                     material=material_obj,
@@ -116,8 +178,7 @@ def calcular_materiales(request):
 
         return redirect('calculos:ver_calculos', proyecto.id)
 
-    return render(request, 'calculos/calculadora.html', {'proyectos': proyectos})
-
+    return render(request, 'calculos/calculadora.html', {'proyectos': proyectos, 'tipos_calculo': tipos_calculo})
 
 
 

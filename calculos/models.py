@@ -15,6 +15,15 @@ class CalculoMateriales(models.Model):
         ('losa_vigueta_bovedilla', 'Losa con Vigueta y Bovedilla'),
         ('losa_acero', 'Losa de Acero'),
         ('cimentacion', 'Cimentación'),
+        ('zapatas', 'Zapatas'),
+        ('vigas_confinamiento', 'Vigas de Confinamiento'),
+        ('escaleras', 'Escaleras'),
+        ('piso', 'Piso Cerámico'),
+        ('cielo_falso', 'Cielo Falso'),
+        ('C-A', 'Columna Tipo A'),
+        ('C-B', 'Columna Tipo B'),
+        ('C-C', 'Columna Tipo C'),
+        ('C-D', 'Columna Tipo D'),
     ]
 
     proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name="calculos")

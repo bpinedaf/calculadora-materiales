@@ -30,19 +30,58 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Tipo de Cálculo:</label>
-                <select name="tipo_calculo" required class="form-select">
-                    <option value="muro">Muro</option>
-                    <option value="losa_fundida">Losa Fundida</option>
-                    <option value="losa_vigueta_bovedilla">Losa con Vigueta y Bovedilla</option>
-                    <option value="losa_acero">Losa de Acero</option>
-                    <option value="cimentacion">Cimentación</option>
-                    <option value="zapatas">Zapatas</option>
-                    <option value="repello">Repello</option>
-                    <option value="piso">Piso</option>
-                    <option value="cielo_falso">Cielo Falso</option>
-                </select>
-            </div>
+				<label class="form-label">Tipo de Cálculo:</label>
+				<select name="tipo_calculo" id="tipo_calculo" required class="form-select">
+					{% for tipo in tipos_calculo %}
+						<option value="{{ tipo.0 }}">{{ tipo.1 }}</option>
+					{% endfor %}
+				</select>
+			</div>
+
+			<!-- Sección para Columnas (Oculta por defecto) -->
+			<div id="columna_fields" style="display: none;">
+				<div class="mb-3">
+					<label class="form-label">Cantidad de Columnas:</label>
+					<input type="number" step="1" name="cantidad_columnas" id="cantidad_columnas" class="form-control">
+				</div>
+				<div class="row">
+					<div class="col-md-4 mb-3">
+						<label class="form-label">Ancho (m):</label>
+						<input type="number" step="0.01" name="columna_ancho" id="columna_ancho" class="form-control">
+					</div>
+					<div class="col-md-4 mb-3">
+						<label class="form-label">Profundidad (m):</label>
+						<input type="number" step="0.01" name="columna_profundidad" id="columna_profundidad" class="form-control">
+					</div>
+					<div class="col-md-4 mb-3">
+						<label class="form-label">Altura (m):</label>
+						<input type="number" step="0.01" name="columna_altura" id="columna_altura" class="form-control">
+					</div>
+				</div>
+			</div>
+
+			<script>
+				document.addEventListener("DOMContentLoaded", function() {
+					var tipoCalculo = document.getElementById("tipo_calculo");
+					var columnaFields = document.getElementById("columna_fields");
+
+					tipoCalculo.addEventListener("change", function() {
+						if (["C-A", "C-B", "C-C", "C-D"].includes(tipoCalculo.value)) {
+							columnaFields.style.display = "block";
+							document.getElementById("cantidad_columnas").required = true;
+							document.getElementById("columna_ancho").required = true;
+							document.getElementById("columna_profundidad").required = true;
+							document.getElementById("columna_altura").required = true;
+						} else {
+							columnaFields.style.display = "none";
+							document.getElementById("cantidad_columnas").required = false;
+							document.getElementById("columna_ancho").required = false;
+							document.getElementById("columna_profundidad").required = false;
+							document.getElementById("columna_altura").required = false;
+						}
+					});
+				});
+			</script>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
