@@ -27,6 +27,17 @@ SECRET_KEY = 'django-insecure-c=oy61fd#bbx9ggy56x^glwz%%*2o1)+ch%g#91^a)+dn6j$yi
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# Configuración de CSRF para Railway
+CSRF_TRUSTED_ORIGINS = [
+    "https://calculadora-materiales-production.up.railway.app"
+]
+
+# Asegurar que los formularios incluyan CSRF
+CSRF_COOKIE_SECURE = True
+CSRF_USE_SESSIONS = True
+
+
+
 # Application definition
 
 INSTALLED_APPS = [
