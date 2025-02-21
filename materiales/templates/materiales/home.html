@@ -33,66 +33,77 @@
         </button>
     </div>
 
-    <!-- Sección de funciones principales -->
-	<div class="row text-center">
-		<div class="col-md-4">
-			<div class="card shadow-sm">
-				<div class="card-body">
-					<h5 class="card-title">Cálculo de Materiales</h5>
-					<p class="card-text">Realiza cálculos para la construcción.</p>
-					<a href="{% url 'calculos:calcular_materiales' %}" class="btn btn-primary">Ir a Cálculo</a>
-
-				</div>
-			</div>
-		</div>
-		<div class="col-md-4">
-			<div class="card shadow-sm">
-				<div class="card-body">
-					<h5 class="card-title">Exportar Cálculos</h5>
-					<p class="card-text">Selecciona un proyecto para exportar los cálculos.</p>
-					<form method="GET" action="">
-						<select name="proyecto_id" class="form-control mb-2" id="proyectoSeleccionado">
-							{% for proyecto in proyectos %}
-								<option value="{{ proyecto.id }}">{{ proyecto.nombre }}</option>
-							{% endfor %}
-						</select>
-						<button type="button" class="btn btn-success" onclick="exportarCalculos()">Descargar Excel</button>
-					</form>
-
-					<script>
-						function exportarCalculos() {
-							var proyectoId = document.getElementById("proyectoSeleccionado").value;
-							if (proyectoId) {
-								window.location.href = `/calculos/exportar_calculos/${proyectoId}/`;
-							} else {
-								alert("Por favor, selecciona un proyecto antes de exportar.");
-							}
-						}
-					</script>
-
-				</div>
-			</div>
-		</div>
-		<div class="col-md-4">
-			<div class="card shadow-sm">
-				<div class="card-body">
-					<h5 class="card-title">Gestión de Materiales</h5>
-					<p class="card-text">Agrega, edita y elimina materiales.</p>
-					<a href="{% url 'calculos:gestionar_materiales' %}" class="btn btn-primary">Ir a Materiales</a>
-
-				</div>
-			</div>
-		</div>
-		<div class="col-md-4">
-			<div class="card shadow-sm">
-				<div class="card-body">
-					<h5 class="card-title">Gestión de Proyectos</h5>
-					<p class="card-text">Consulta, actualiza y elimina proyectos.</p>
-					<a href="{% url 'calculos:ver_proyectos' %}" class="btn btn-primary">Ir a Proyectos</a>
-
-				</div>
-			</div>
-		</div>
-	</div>
+    <!-- Sección de funciones principales mejorada -->
+    <div class="row text-center">
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-lg border-0 p-3">
+                <i class="fas fa-calculator fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Cálculo de Materiales</h5>
+                <p class="card-text">Realiza cálculos precisos para la construcción.</p>
+                <a href="{% url 'calculos:calcular_materiales' %}" class="btn btn-primary">Ir a Cálculo</a>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-lg border-0 p-3">
+                <i class="fas fa-file-export fa-3x text-success mb-3"></i>
+                <h5 class="card-title">Exportar Cálculos</h5>
+                <p class="card-text">Selecciona un proyecto para exportar los cálculos.</p>
+                <form method="GET" action="">
+                    <select name="proyecto_id" class="form-control mb-2" id="proyectoSeleccionado">
+                        {% for proyecto in proyectos %}
+                            <option value="{{ proyecto.id }}">{{ proyecto.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" class="btn btn-success" onclick="exportarCalculos()">Descargar Excel</button>
+                </form>
+                <script>
+                    function exportarCalculos() {
+                        var proyectoId = document.getElementById("proyectoSeleccionado").value;
+                        if (proyectoId) {
+                            window.location.href = `/calculos/exportar_calculos/${proyectoId}/`;
+                        } else {
+                            alert("Por favor, selecciona un proyecto antes de exportar.");
+                        }
+                    }
+                </script>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-lg border-0 p-3">
+                <i class="fas fa-cubes fa-3x text-warning mb-3"></i>
+                <h5 class="card-title">Gestión de Materiales</h5>
+                <p class="card-text">Agrega, edita y elimina materiales.</p>
+                <a href="{% url 'calculos:gestionar_materiales' %}" class="btn btn-warning">Ir a Materiales</a>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-lg border-0 p-3">
+                <i class="fas fa-project-diagram fa-3x text-secondary mb-3"></i>
+                <h5 class="card-title">Gestión de Proyectos</h5>
+                <p class="card-text">Consulta, actualiza y elimina proyectos.</p>
+                <a href="{% url 'calculos:ver_proyectos' %}" class="btn btn-secondary">Ir a Proyectos</a>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Botón flotante con tooltip -->
+<a href="{% url 'calculos:gestionar_materiales' %}" 
+   class="btn btn-primary position-fixed bottom-0 end-0 m-4 shadow-lg d-flex align-items-center justify-content-center"
+   style="width: 65px; height: 65px; border-radius: 50%; font-size: 24px; position: relative;"
+   data-bs-toggle="tooltip" data-bs-placement="left" title="Agregar Nuevo Material">
+    <i class="fas fa-plus"></i>
+</a>
+
+<!-- Script para inicializar tooltips de Bootstrap -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+
+
 {% endblock %}
