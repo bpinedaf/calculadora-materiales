@@ -22,6 +22,73 @@
 {% if proyecto_seleccionado %}
 <h3 class="text-center">Cálculos para {{ proyecto_seleccionado.nombre }}</h3>
 
+<!-- Botón para abrir la vista previa -->
+<div class="text-center my-3">
+    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modalPrevisualizacion">
+        Ver Previsualización
+    </button>
+</div>
+
+<!-- Modal de Vista Previa -->
+<div class="modal fade" id="modalPrevisualizacion" tabindex="-1" aria-labelledby="modalPrevisualizacionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalPrevisualizacionLabel">Previsualización de Cálculos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Descripción</th>
+                            <th>Área (m²)</th>
+                            <th>Desperdicio (%)</th>
+                            <th>Materiales</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaPrevisualizacion">
+                        <!-- Aquí se llenarán los datos con JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <a href="{% url 'calculos:exportar_calculos_excel' proyecto_seleccionado.id %}" class="btn btn-success">
+                    Confirmar y Exportar
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script para llenar la vista previa dinámicamente -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var datosPrevisualizacion = [];
+
+        {% for calculo in calculos %}
+            datosPrevisualizacion.push({
+                descripcion: "{{ calculo.descripcion }}",
+                area: "{{ calculo.area }}",
+                desperdicio: "{{ calculo.desperdicio }}",
+                materiales: `{% for material, cantidad in calculo.materiales_pendientes.items %}{{ material }}: {{ cantidad }}<br>{% endfor %}`
+            });
+        {% endfor %}
+
+        var tablaPrevisualizacion = document.getElementById("tablaPrevisualizacion");
+        datosPrevisualizacion.forEach(function (calculo) {
+            var fila = `<tr>
+                <td>${calculo.descripcion}</td>
+                <td>${calculo.area}</td>
+                <td>${calculo.desperdicio}</td>
+                <td>${calculo.materiales}</td>
+            </tr>`;
+            tablaPrevisualizacion.innerHTML += fila;
+        });
+    });
+</script>
+
 <!-- Botón para exportar cálculos a Excel -->
 <div class="text-center my-3">
     {% if proyecto_seleccionado %}
