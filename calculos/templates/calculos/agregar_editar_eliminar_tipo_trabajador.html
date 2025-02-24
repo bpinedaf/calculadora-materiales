@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">{{ accion }} Tipo de Trabajador</h2>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label">Nombre del Tipo de Trabajador</label>
+            {{ form.nombre }}
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Tarifa por M² (Opcional)</label>
+            {{ form.tarifa_m2 }}
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Tarifa por M.L. (Opcional)</label>
+            {{ form.tarifa_ml }}
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Tarifa por Día (Opcional)</label>
+            {{ form.tarifa_dia }}
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'calculos:listar_tipos_trabajador' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+	<a href="{% url 'home' %}" class="btn btn-secondary mt-3">Volver a Inicio</a>
+
+</div>
+{% endblock %}

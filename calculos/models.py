@@ -52,3 +52,19 @@ class CalculoMaterialDetalle(models.Model):
 
     def __str__(self):
         return f"{self.material.nombre} - Req: {self.cantidad_requerida} - Cons: {self.cantidad_consumida} - Pend: {self.cantidad_pendiente}"
+
+class TipoTrabajador(models.Model):
+    nombre = models.CharField(max_length=100, unique=True)
+    tarifa_m2 = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    tarifa_ml = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    tarifa_dia = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
+    def __str__(self):
+        return self.nombre
+
+class Trabajador(models.Model):
+    nombre = models.CharField(max_length=200)
+    tipo = models.ForeignKey(TipoTrabajador, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.nombre} - {self.tipo.nombre}"

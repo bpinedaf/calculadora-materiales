@@ -2,8 +2,9 @@ import pandas as pd
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from materiales.models import Material
-from .models import CalculoMateriales, Proyecto, CalculoMaterialDetalle
-from .forms import CalculoMaterialesForm
+from .models import CalculoMateriales, Proyecto, CalculoMaterialDetalle, TipoTrabajador, Trabajador
+from .forms import CalculoMaterialesForm, TipoTrabajadorForm, TrabajadorForm
+from django.urls import reverse
 
 
 # Factores de consumo por m² para cada tipo de estructura
@@ -347,3 +348,71 @@ def gestionar_materiales(request):
 def home(request):
     proyectos = Proyecto.objects.all()
     return render(request, 'calculos/home.html', {'proyectos': proyectos})
+
+
+
+
+
+def listar_tipos_trabajador(request):
+    tipos = TipoTrabajador.objects.all()
+    return render(request, 'calculos/lista_tipos.html', {'tipos': tipos})
+
+def agregar_tipo_trabajador(request):
+    if request.method == "POST":
+        form = TipoTrabajadorForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('calculos:listar_tipos_trabajador')
+    else:
+        form = TipoTrabajadorForm()
+    return render(request, 'calculos/agregar_editar_eliminar_tipo_trabajador.html', {'form': form, 'accion': 'Agregar'})
+
+def editar_tipo_trabajador(request, tipo_id):
+    tipo = get_object_or_404(TipoTrabajador, id=tipo_id)
+    if request.method == "POST":
+        form = TipoTrabajadorForm(request.POST, instance=tipo)
+        if form.is_valid():
+            form.save()
+            return redirect('calculos:listar_tipos_trabajador')
+    else:
+        form = TipoTrabajadorForm(instance=tipo)
+    return render(request, 'calculos/agregar_editar_eliminar_tipo_trabajador.html', {'form': form, 'accion': 'Editar'})
+
+def eliminar_tipo_trabajador(request, tipo_id):
+    tipo = get_object_or_404(TipoTrabajador, id=tipo_id)
+    if request.method == "POST":
+        tipo.delete()
+        return redirect('calculos:listar_tipos_trabajador')
+    return render(request, 'calculos/agregar_editar_eliminar_tipo_trabajador.html', {'tipo': tipo, 'accion': 'Eliminar'})
+
+def gestionar_trabajadores(request):
+    trabajadores = Trabajador.objects.all()
+    return render(request, 'calculos/gestionar_trabajadores.html', {'trabajadores': trabajadores})
+
+def agregar_trabajador(request):
+    if request.method == "POST":
+        form = TrabajadorForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('calculos:gestionar_trabajadores')
+    else:
+        form = TrabajadorForm()
+    return render(request, 'calculos/agregar_editar_eliminar_trabajador.html', {'form': form, 'accion': 'Agregar'})
+
+def editar_trabajador(request, trabajador_id):
+    trabajador = get_object_or_404(Trabajador, id=trabajador_id)
+    if request.method == "POST":
+        form = TrabajadorForm(request.POST, instance=trabajador)
+        if form.is_valid():
+            form.save()
+            return redirect('calculos:gestionar_trabajadores')
+    else:
+        form = TrabajadorForm(instance=trabajador)
+    return render(request, 'calculos/agregar_editar_eliminar_trabajador.html', {'form': form, 'accion': 'Editar'})
+
+def eliminar_trabajador(request, trabajador_id):
+    trabajador = get_object_or_404(Trabajador, id=trabajador_id)
+    if request.method == "POST":
+        trabajador.delete()
+        return redirect('calculos:gestionar_trabajadores')
+    return render(request, 'calculos/agregar_editar_eliminar_trabajador.html', {'trabajador': trabajador, 'accion': 'Eliminar'})

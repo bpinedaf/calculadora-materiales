@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center">
+        {% if trabajador %}Editar Trabajador{% else %}Agregar Trabajador{% endif %}
+    </h2>
+    <div class="card p-4 shadow-sm">
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Nombre del Trabajador:</label>
+                <input type="text" name="nombre" value="{{ trabajador.nombre|default:'' }}" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tipo de Trabajador:</label>
+                <select name="tipo" class="form-select" required>
+                    {% for tipo in tipos_trabajador %}
+                        <option value="{{ tipo.id }}" {% if trabajador.tipo.id == tipo.id %}selected{% endif %}>{{ tipo.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-success">Guardar</button>
+                <a href="{% url 'calculos:gestionar_trabajadores' %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+	<a href="{% url 'home' %}" class="btn btn-secondary mt-3">Volver a Inicio</a>
+</div>
+{% endblock %}

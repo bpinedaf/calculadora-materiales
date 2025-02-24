@@ -84,6 +84,22 @@
                 <a href="{% url 'calculos:ver_proyectos' %}" class="btn btn-secondary">Ir a Proyectos</a>
             </div>
         </div>
+		<div class="col-md-4 mb-4">
+            <div class="card shadow-lg border-0 p-3">
+                <i class="fas fa-users fa-3x text-info mb-3"></i>
+                <h5 class="card-title">Gestión de Trabajadores</h5>
+                <p class="card-text">Crea, edita y administra los tipos de trabajadores y tarifas.</p>
+                <a href="{% url 'calculos:gestionar_trabajadores' %}" class="btn btn-info">Ir a Trabajadores</a>
+            </div>
+        </div>
+		<div class="col-md-4 mb-4">
+			<div class="card shadow-lg border-0 p-3">
+				<i class="fas fa-user-cog fa-3x text-info mb-3"></i>
+				<h5 class="card-title">Gestión de Tipos de Trabajador</h5>
+				<p class="card-text">Crea, edita y administra los tipos de trabajadores y sus tarifas.</p>
+				<a href="{% url 'calculos:listar_tipos_trabajador' %}" class="btn btn-info">Ir a Tipos de Trabajador</a>
+			</div>
+		</div>
     </div>
 </div>
 
@@ -104,6 +120,5 @@
         });
     });
 </script>
-
 
 {% endblock %}

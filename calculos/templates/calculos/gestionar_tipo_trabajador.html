@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Gestión de Tipos de Trabajador</h2>
+    <a href="{% url 'calculos:agregar_tipo_trabajador' %}" class="btn btn-success">Agregar Tipo de Trabajador</a>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Tarifa por M²</th>
+                <th>Tarifa por M.L.</th>
+                <th>Tarifa por Día</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tipo in tipos %}
+            <tr>
+                <td>{{ tipo.nombre }}</td>
+                <td>Q{{ tipo.tarifa_m2 }}</td>
+                <td>Q{{ tipo.tarifa_ml }}</td>
+                <td>Q{{ tipo.tarifa_dia }}</td>
+                <td>
+                    <a href="{% url 'calculos:editar_tipo_trabajador' tipo.id %}" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="{% url 'calculos:eliminar_tipo_trabajador' tipo.id %}" class="btn btn-danger btn-sm"
+                        onclick="return confirm('¿Estás seguro de eliminar este tipo de trabajador?');">Eliminar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">No hay tipos de trabajadores registrados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+	<a href="{% url 'home' %}" class="btn btn-secondary mt-3">Volver a Inicio</a>
+</div>
+<a href="{% url 'home' %}" class="btn btn-secondary mt-3">Volver a Inicio</a>
+{% endblock %}
