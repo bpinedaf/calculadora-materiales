@@ -30,70 +30,103 @@
             </div>
 
             <div class="mb-3">
-				<label class="form-label">Tipo de Cálculo:</label>
-				<select name="tipo_calculo" id="tipo_calculo" required class="form-select">
+                <label class="form-label">Tipo de Cálculo:</label>
+                <select name="tipo_calculo" id="tipo_calculo" required class="form-select">
 					{% for tipo in tipos_calculo %}
 						<option value="{{ tipo.0 }}">{{ tipo.1 }}</option>
 					{% endfor %}
 				</select>
-			</div>
 
-			<!-- Sección para Columnas (Oculta por defecto) -->
-			<div id="columna_fields" style="display: none;">
-				<div class="mb-3">
-					<label class="form-label">Cantidad de Columnas:</label>
-					<input type="number" step="1" name="cantidad_columnas" id="cantidad_columnas" class="form-control">
-				</div>
-				<div class="row">
-					<div class="col-md-4 mb-3">
-						<label class="form-label">Ancho (m):</label>
-						<input type="number" step="0.01" name="columna_ancho" id="columna_ancho" class="form-control">
-					</div>
-					<div class="col-md-4 mb-3">
-						<label class="form-label">Profundidad (m):</label>
-						<input type="number" step="0.01" name="columna_profundidad" id="columna_profundidad" class="form-control">
-					</div>
-					<div class="col-md-4 mb-3">
-						<label class="form-label">Altura (m):</label>
-						<input type="number" step="0.01" name="columna_altura" id="columna_altura" class="form-control">
-					</div>
-				</div>
-			</div>
+            </div>
 
-			<script>
-				document.addEventListener("DOMContentLoaded", function() {
-					var tipoCalculo = document.getElementById("tipo_calculo");
-					var columnaFields = document.getElementById("columna_fields");
-
-					tipoCalculo.addEventListener("change", function() {
-						if (["C-A", "C-B", "C-C", "C-D"].includes(tipoCalculo.value)) {
-							columnaFields.style.display = "block";
-							document.getElementById("cantidad_columnas").required = true;
-							document.getElementById("columna_ancho").required = true;
-							document.getElementById("columna_profundidad").required = true;
-							document.getElementById("columna_altura").required = true;
-						} else {
-							columnaFields.style.display = "none";
-							document.getElementById("cantidad_columnas").required = false;
-							document.getElementById("columna_ancho").required = false;
-							document.getElementById("columna_profundidad").required = false;
-							document.getElementById("columna_altura").required = false;
-						}
-					});
-				});
-			</script>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
+            <!-- Campo para Área (m²) -->
+            <div id="area_field" style="display: none;">
+                <div class="mb-3">
                     <label class="form-label">Área en m²:</label>
-                    <input type="number" step="0.01" name="area" required class="form-control">
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Desperdicio (%):</label>
-                    <input type="number" step="0.1" name="desperdicio" value="5" class="form-control">
+                    <input type="number" step="0.01" name="area" id="area" class="form-control">
                 </div>
             </div>
-            
+
+            <!-- Sección para Cimientos Corridos -->
+            <div id="cimientos_fields" style="display: none;">
+                <div class="mb-3">
+                    <label class="form-label">Metros Lineales de Cimiento:</label>
+                    <input type="number" step="0.01" name="metros_lineales" id="metros_lineales" class="form-control">
+                </div>
+            </div>
+
+            <!-- Sección para Zapatas -->
+            <div id="zapatas_fields" style="display: none;">
+                <div class="mb-3">
+                    <label class="form-label">Cantidad de Zapatas:</label>
+                    <input type="number" step="1" name="cantidad_zapatas" id="cantidad_zapatas" class="form-control">
+                </div>
+            </div>
+
+            <!-- Sección para Columnas -->
+            <div id="columna_fields" style="display: none;">
+                <div class="mb-3">
+                    <label class="form-label">Cantidad de Columnas:</label>
+                    <input type="number" step="1" name="cantidad_columnas" id="cantidad_columnas" class="form-control">
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Ancho (m):</label>
+                        <input type="number" step="0.01" name="columna_ancho" id="columna_ancho" class="form-control">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Profundidad (m):</label>
+                        <input type="number" step="0.01" name="columna_profundidad" id="columna_profundidad" class="form-control">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Altura (m):</label>
+                        <input type="number" step="0.01" name="columna_altura" id="columna_altura" class="form-control">
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+					var tipoCalculo = document.getElementById("tipo_calculo");
+					var areaField = document.getElementById("area_field");
+					var cimientosFields = document.getElementById("cimientos_fields");
+					var zapatasFields = document.getElementById("zapatas_fields");
+					var columnaFields = document.getElementById("columna_fields");
+
+					function actualizarCampos() {
+						areaField.style.display = "none";
+						cimientosFields.style.display = "none";
+						zapatasFields.style.display = "none";
+						columnaFields.style.display = "none";
+
+						document.getElementById("area").required = false;
+						document.getElementById("metros_lineales").required = false;
+						document.getElementById("cantidad_zapatas").required = false;
+						document.getElementById("cantidad_columnas").required = false;
+
+						if (["muro", "losa_fundida", "losa_vigueta_bovedilla", "losa_acero", "piso", "cielo_falso"].includes(tipoCalculo.value)) {
+							areaField.style.display = "block";
+							document.getElementById("area").required = true;
+						} else if (["cimiento_corrido_1", "cimiento_corrido_2"].includes(tipoCalculo.value)) {
+							cimientosFields.style.display = "block";
+							document.getElementById("metros_lineales").required = true;
+						} else if (["zapata_1", "zapata_2"].includes(tipoCalculo.value)) {
+							zapatasFields.style.display = "block";
+							document.getElementById("cantidad_zapatas").required = true;
+						} else if (["C-A", "C-B", "C-C", "C-D"].includes(tipoCalculo.value)) {
+							columnaFields.style.display = "block";
+							document.getElementById("cantidad_columnas").required = true;
+						}
+					}
+
+					// Ejecutar al inicio para seleccionar la opción por defecto
+					actualizarCampos();
+
+					// Detectar cambios en la selección
+					tipoCalculo.addEventListener("change", actualizarCampos);
+				});
+            </script>
+
             <div class="text-center">
                 <button type="submit" class="btn btn-primary">Calcular</button>
                 <a href="/" class="btn btn-secondary ms-2">Volver a Inicio</a>

@@ -32,27 +32,40 @@ FACTORES_MATERIALES = {
         'acero_temperatura': 1.5,  
         'cimbra_madera': 0.6,  
     },
-    'cimentacion': {
-        'cimientos_corridos': 0.2,  
-        'varilla_1/2': 5,  
-        'estribos_1/4': 3,  
-        'concreto': 0.2,  
-        'varilla_3/8': 8,  
-        'block': 10,  
-        'solera_U': 2,  
-        'amarres': 1.5,  
+    'cimiento_corrido_1': {
+        'concreto': 0.25,
+        'varilla_1/2': 6,
+        'estribos_1/4': 3.5,
+        'block': 12,
+        'solera_U': 2.5,
+        'amarres': 1.7,
+    },
+    'cimiento_corrido_2': {
+        'concreto': 0.30,
+        'varilla_5/8': 7,
+        'estribos_3/8': 4,
+        'block': 15,
+        'solera_U': 3,
+        'amarres': 2,
+    },
+    'zapata_1': {
+        'cemento': 8,
+        'arena': 0.6,
+        'grava': 0.9,
+        'agua': 200,
+        'acero': 18,
+    },
+    'zapata_2': {
+        'cemento': 9,
+        'arena': 0.7,
+        'grava': 1.0,
+        'agua': 220,
+        'acero': 20,
     },
     'vigas_confinamiento': {
         'concreto': 0.08,  
         'varilla_1/2': 4,  
         'estribos_1/4': 2.5,  
-    },
-    'zapatas': {
-        'cemento': 7,  
-        'arena': 0.5,  
-        'grava': 0.7,  
-        'agua': 180,  
-        'acero': 15,  
     },
     'escaleras': {
         'concreto': 0.2,  
@@ -109,7 +122,8 @@ FACTORES_MATERIALES = {
 
 def calcular_materiales(request):
     proyectos = Proyecto.objects.all()
-    tipos_calculo = CalculoMateriales.TIPO_CALCULO_CHOICES  # Obtener opciones dinámicamente
+    tipos_calculo = sorted(CalculoMateriales.TIPO_CALCULO_CHOICES, key=lambda x: x[1])  # Ordena alfabéticamente por nombre
+    #tipos_calculo = CalculoMateriales.TIPO_CALCULO_CHOICES  # Obtener opciones dinámicamente
 
     if request.method == 'POST':
         proyecto_id = request.POST.get('proyecto_existente')
@@ -126,35 +140,27 @@ def calcular_materiales(request):
         tipo_calculo = request.POST.get('tipo_calculo')
         desperdicio = float(request.POST.get('desperdicio', 5)) / 100
 
-        # Verificar si el cálculo es de tipo columna
-        if tipo_calculo in ["C-A", "C-B", "C-C", "C-D"]:
-            cantidad_columnas = int(request.POST.get('cantidad_columnas', 0))
-            columna_ancho = float(request.POST.get('columna_ancho', 0))
-            columna_profundidad = float(request.POST.get('columna_profundidad', 0))
-            columna_altura = float(request.POST.get('columna_altura', 0))
-
-            # Calcular el área de una columna
-            perimetro_columna = 2 * (columna_ancho + columna_profundidad)
-            area_columna = perimetro_columna * columna_altura
-
-            # Calcular el área total de columnas
-            area = area_columna * cantidad_columnas
+        # Determinar cantidad basada en el tipo de cálculo
+        if tipo_calculo in ['cimiento_corrido_1', 'cimiento_corrido_2']:
+            cantidad = float(request.POST.get('metros_lineales', 0))  # Metros lineales
+        elif tipo_calculo in ['zapata_1', 'zapata_2']:
+            cantidad = int(request.POST.get('cantidad_zapatas', 0))  # Cantidad de zapatas
         else:
-            area = float(request.POST.get('area', 0))
+            cantidad = float(request.POST.get('area', 0))
 
         # Crear el cálculo de materiales
         calculo = CalculoMateriales.objects.create(
             proyecto=proyecto,
             descripcion=descripcion,
             tipo_calculo=tipo_calculo,
-            area=area,
+            cantidad=cantidad,
             desperdicio=desperdicio * 100
         )
 
         # Guardar los materiales en la base de datos
         if tipo_calculo in FACTORES_MATERIALES:
             for material_nombre, factor in FACTORES_MATERIALES[tipo_calculo].items():
-                cantidad_requerida = area * factor * (1 + desperdicio)
+                cantidad_requerida = cantidad * factor * (1 + desperdicio)
                 cantidad_pendiente = cantidad_requerida  # Al inicio, nada ha sido consumido
 
                 material_obj = Material.objects.filter(nombre__iexact=material_nombre).first()
@@ -179,6 +185,7 @@ def calcular_materiales(request):
         return redirect('calculos:ver_calculos', proyecto.id)
 
     return render(request, 'calculos/calculadora.html', {'proyectos': proyectos, 'tipos_calculo': tipos_calculo})
+
 
 
 
